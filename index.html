@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="app-version" content="1.5.1">
+  <meta name="app-version" content="1.5.2">
   <title>イオン化傾向暗記倶楽部</title>
 
   <!-- アイコン設定 -->
-  <link rel="icon" href="icon.png?v=1.5.1" type="image/png">
-  <link rel="apple-touch-icon" href="icon.png?v=1.5.1">
+  <link rel="icon" href="icon.png?v=1.5.2" type="image/png">
+  <link rel="apple-touch-icon" href="icon.png?v=1.5.2">
 
   <!-- PWA設定 -->
-  <link rel="manifest" href="manifest.json?v=1.5.1">
+  <link rel="manifest" href="manifest.json?v=1.5.2">
   <meta name="theme-color" content="#2c3e50">
 
   <!-- iOS (Safari) 用全画面表示設定 -->
@@ -179,19 +179,19 @@
 
     .header-container {
       text-align: center;
-      margin: 2px 0 4px 0;
+      margin: 2px 0 6px 0;
     }
 
     h1 {
       display: inline-block;
       color: var(--primary-color);
       margin: 0;
-      font-size: 18px;
+      font-size: 19px;
     }
 
     .version-badge {
       display: inline-block;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: bold;
       color: #7f8c8d;
       background-color: #e2e8f0;
@@ -218,7 +218,7 @@
       background-color: #fff;
       color: var(--secondary-color);
       font-weight: bold;
-      font-size: 12px;
+      font-size: 14px;
       border-radius: 16px;
       cursor: pointer;
       transition: all 0.2s;
@@ -930,7 +930,7 @@
     .hidden { display: none !important; }
 
     @media (max-width: 600px) {
-      .elem-chip .symbol { font-size: 11px; }
+      .elem-chip .symbol { font-size: 12px; }
       .elem-chip .goro { font-size: 7.5px; }
       .btn-grid { grid-template-columns: 1fr; }
       .grid { grid-template-columns: 1fr; }
@@ -954,7 +954,7 @@
   <div class="container">
     <div class="header-container">
       <h1>イオン化傾向暗記倶楽部</h1>
-      <span class="version-badge" id="versionBadge">v1.5.1</span>
+      <span class="version-badge" id="versionBadge">v1.5.2</span>
     </div>
 
     <!-- モード切替タブ -->
@@ -1152,10 +1152,17 @@
   // ==========================================
   // バージョン管理・更新履歴設定
   // ==========================================
-  const CURRENT_VERSION = "1.5.1";
+  const CURRENT_VERSION = "1.5.2";
   const STORAGE_KEY_VERSION = "ionization_app_version";
 
   const UPDATES_HISTORY = [
+    {
+      version: "1.5.2",
+      date: "2026-09-24",
+      changes: [
+        "文字の大きさを微修正"
+      ]
+    },
     {
       version: "1.5.1",
       date: "2026-09-23",
