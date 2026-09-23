@@ -1,0 +1,2254 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="app-version" content="1.5.1">
+  <title>イオン化傾向暗記倶楽部</title>
+
+  <!-- アイコン設定 -->
+  <link rel="icon" href="icon.png?v=1.5.1" type="image/png">
+  <link rel="apple-touch-icon" href="icon.png?v=1.5.1">
+
+  <!-- PWA設定 -->
+  <link rel="manifest" href="manifest.json?v=1.5.1">
+  <meta name="theme-color" content="#2c3e50">
+
+  <!-- iOS (Safari) 用全画面表示設定 -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="イオン化傾向">
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #2980b9;
+      --accent-color: #8e44ad;
+      --highlight-color: #f39c12;
+      --bg-color: #f8f9fa;
+      --card-bg: #ffffff;
+      --text-color: #333333;
+      --border-color: #e9ecef;
+      --success-color: #27ae60;
+      --error-color: #e74c3c;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0 0 16px 0;
+      line-height: 1.4;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 0 6px;
+    }
+
+    /* バージョン更新通知バナー */
+    .version-notice {
+      background: linear-gradient(135deg, #2980b9, #3498db);
+      color: #ffffff;
+      padding: 8px 12px;
+      margin: 6px 6px 0 6px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      font-size: 13px;
+      position: relative;
+      z-index: 101;
+    }
+
+    .version-notice-content {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .version-notice-title {
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .version-notice-close {
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      color: #ffffff;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+
+    .version-notice-close:hover {
+      background: rgba(255, 255, 255, 0.35);
+    }
+
+    /* モーダルスタイル */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+
+    .modal-content {
+      background: #fff;
+      border-radius: 8px;
+      max-width: 500px;
+      width: 90%;
+      padding: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      animation: modalFadeIn 0.3s ease-out;
+      overflow: hidden;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid var(--secondary-color);
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--primary-color);
+      line-height: 1.4;
+    }
+
+    .modal-footer {
+      text-align: right;
+    }
+
+    .modal-body {
+      font-size: 13px;
+      color: #444;
+      line-height: 1.6;
+      max-height: 60vh;
+      overflow-y: auto;
+      margin-bottom: 16px;
+    }
+
+    .modal-btn {
+      background-color: var(--primary-color);
+      color: #fff;
+      border: none;
+      padding: 6px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    /* 固定ヘッダーエリア */
+    .sticky-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: var(--bg-color);
+      padding: 4px 0 6px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .header-container {
+      text-align: center;
+      margin: 2px 0 4px 0;
+    }
+
+    h1 {
+      display: inline-block;
+      color: var(--primary-color);
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .version-badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: bold;
+      color: #7f8c8d;
+      background-color: #e2e8f0;
+      padding: 1px 5px;
+      border-radius: 10px;
+      margin-left: 4px;
+      vertical-align: middle;
+      cursor: pointer;
+    }
+
+    /* モード切替タブ */
+    .mode-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      max-width: 120px;
+      padding: 5px 0;
+      border: 1.5px solid var(--secondary-color);
+      background-color: #fff;
+      color: var(--secondary-color);
+      font-weight: bold;
+      font-size: 12px;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .tab-btn.active {
+      background-color: var(--secondary-color);
+      color: #fff;
+    }
+
+    /* イオン化列固定ボード */
+    .series-board {
+      background: #ffffff;
+      border: 2px solid var(--primary-color);
+      border-radius: 8px;
+      padding: 6px 4px;
+      transition: all 0.3s ease;
+    }
+
+    .series-grid {
+      display: grid;
+      grid-template-columns: repeat(11, 1fr);
+      gap: 2px;
+      margin-bottom: 4px;
+    }
+
+    .series-grid:last-child {
+      margin-bottom: 0;
+    }
+
+    .elem-chip {
+      background-color: #edf2f7;
+      border: 1.5px solid #cbd5e0;
+      border-radius: 5px;
+      padding: 3px 0;
+      text-align: center;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-width: 0;
+      user-select: none;
+    }
+
+    .elem-chip .symbol {
+      font-size: 13px;
+      font-weight: bold;
+      color: #2d3748;
+      line-height: 1.1;
+      font-family: "Georgia", serif;
+    }
+
+    .elem-chip .goro {
+      font-size: 8px;
+      color: #718096;
+      line-height: 1;
+      margin-top: 2px;
+      white-space: nowrap;
+    }
+
+    .elem-chip.highlight {
+      background-color: #feefc3;
+      border-color: #f39c12;
+      box-shadow: 0 0 5px rgba(243, 156, 18, 0.7);
+      transform: translateY(-1px);
+    }
+
+    .elem-chip.highlight .symbol { color: #d35400; }
+    .elem-chip.highlight .goro { color: #b9770e; font-weight: bold; }
+
+    .elem-chip.dimmed {
+      opacity: 0.3;
+      filter: grayscale(80%);
+    }
+
+    /* マップモード */
+    .map-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .filter-section {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+
+    .filter-group-title {
+      font-size: 13px;
+      font-weight: bold;
+      color: var(--primary-color);
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 4px;
+      margin: 0 0 8px 0;
+    }
+
+    .btn-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+      gap: 6px;
+    }
+
+    .filter-btn {
+      background-color: #f7fafc;
+      border: 1px solid #cbd5e0;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #4a5568;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+      font-weight: 500;
+      line-height: 1.3;
+    }
+
+    .filter-btn:hover { background-color: #edf2f7; }
+
+    .filter-btn.active {
+      background-color: #2980b9;
+      color: #ffffff;
+      border-color: #1c5980;
+      font-weight: bold;
+      box-shadow: 0 2px 4px rgba(41, 128, 185, 0.3);
+    }
+
+    .info-box {
+      background-color: #ebf8ff;
+      border-left: 4px solid #3182ce;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #2b6cb0;
+      line-height: 1.4;
+      margin-top: 8px;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 一覧モード */
+    .list-container { margin-top: 8px; }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 4px;
+      margin-bottom: 6px;
+      width: 100%;
+    }
+
+    select, input[type="text"] {
+      padding: 6px 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 13px;
+      width: 100%;
+      background-color: #fff;
+    }
+
+    .count-info {
+      text-align: right;
+      margin-bottom: 4px;
+      color: #666;
+      font-size: 12px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 10px;
+      width: 100%;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      padding: 10px 12px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .card-row-1 {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 4px;
+    }
+
+    .row-1-left {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .element-symbol {
+      font-size: 22px;
+      font-weight: bold;
+      color: var(--primary-color);
+      font-family: "Georgia", serif;
+    }
+
+    .element-goro {
+      font-size: 13px;
+      font-weight: bold;
+      color: var(--accent-color);
+      background-color: #f3e8ff;
+      padding: 1px 6px;
+      border-radius: 4px;
+      border: 1px solid #e9d5ff;
+    }
+
+    .element-name {
+      font-size: 14px;
+      font-weight: bold;
+      color: #2d3748;
+    }
+
+    .element-ion {
+      font-size: 15px;
+      font-weight: bold;
+      color: #e67e22;
+      background-color: #fffaf0;
+      padding: 1px 6px;
+      border-radius: 4px;
+      border: 1px solid #feebc8;
+      margin-left: auto;
+    }
+
+    .card-row-2 {
+      background-color: #f7fafc;
+      border-radius: 6px;
+      padding: 6px 8px;
+      border-left: 3px solid var(--secondary-color);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-size: 12px;
+    }
+
+    .react-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 4px;
+      line-height: 1.35;
+    }
+
+    .react-label {
+      font-weight: bold;
+      color: #4a5568;
+      white-space: nowrap;
+      min-width: 48px;
+    }
+
+    .react-value { color: #2d3748; }
+
+    .card-row-3 {
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .info-tag-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .info-tag {
+      background-color: #edf2f7;
+      color: #4a5568;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: bold;
+    }
+
+    /* 1問1答モード */
+    .qa-container {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* カテゴリナビゲーション */
+    .qa-category-nav {
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      border-bottom: 2px solid #e2e8f0;
+      padding-bottom: 6px;
+      overflow-x: auto;
+    }
+
+    .qa-cat-btn {
+      background-color: #edf2f7;
+      border: 1px solid #cbd5e0;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: bold;
+      color: #4a5568;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .qa-cat-btn.active {
+      background-color: var(--primary-color);
+      color: #fff;
+      border-color: var(--primary-color);
+    }
+
+    /* 難易度・モード選択 */
+    .qa-level-selector {
+      background: #fff;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 8px 10px;
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .selector-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .selector-label {
+      font-size: 12px;
+      font-weight: bold;
+      color: #4a5568;
+    }
+
+    .qa-level-btn {
+      background-color: #f7fafc;
+      border: 1px solid #cbd5e0;
+      padding: 5px 12px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: bold;
+      color: #4a5568;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .qa-level-btn.active {
+      background-color: var(--secondary-color);
+      color: #fff;
+      border-color: var(--secondary-color);
+    }
+
+    .selector-divider {
+      color: #cbd5e0;
+      font-size: 12px;
+    }
+
+    /* メイン問題カード */
+    .qa-card {
+      background-color: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .qa-question-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .qa-progress-badge {
+      font-size: 11px;
+      font-weight: bold;
+      background-color: #edf2f7;
+      color: #4a5568;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    .qa-question-title {
+      font-size: 14px;
+      font-weight: bold;
+      color: var(--primary-color);
+      line-height: 1.5;
+      border-left: 4px solid var(--secondary-color);
+      padding-left: 8px;
+    }
+
+    /* 解答トレイ (Cat1用) */
+    .qa-tray-container {
+      background-color: #f8fafc;
+      border: 2px dashed #cbd5e0;
+      border-radius: 8px;
+      padding: 10px;
+      min-height: 64px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .qa-tray-label {
+      font-size: 11px;
+      color: #718096;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .qa-tray-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      min-height: 40px;
+      align-items: center;
+    }
+
+    .qa-tray-placeholder {
+      font-size: 12px;
+      color: #a0aec0;
+      font-style: italic;
+      width: 100%;
+      text-align: center;
+    }
+
+    /* 選択肢エリア */
+    .qa-choices-container {
+      background-color: #edf2f7;
+      border-radius: 8px;
+      padding: 10px;
+    }
+
+    .qa-choices-label {
+      font-size: 11px;
+      color: #4a5568;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .qa-choices-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    /* クイズ用チップ */
+    .qa-chip {
+      background-color: #ffffff;
+      border: 2px solid #cbd5e0;
+      border-radius: 8px;
+      padding: 8px 12px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      user-select: none;
+      min-width: 52px;
+      position: relative;
+    }
+
+    .qa-chip:hover {
+      border-color: var(--secondary-color);
+      transform: translateY(-2px);
+    }
+
+    .qa-chip:active {
+      transform: scale(0.95);
+    }
+
+    .qa-chip .symbol {
+      font-size: 15px;
+      font-weight: bold;
+      color: #2d3748;
+      font-family: "Georgia", serif;
+    }
+
+    /* Cat2用トグル選択スタイル */
+    .qa-chip.selected {
+      background-color: #ebf8ff;
+      border-color: #3182ce;
+      box-shadow: 0 0 6px rgba(49, 130, 206, 0.5);
+      transform: translateY(-2px);
+    }
+
+    .qa-chip.selected .symbol {
+      color: #2b6cb0;
+    }
+
+    .qa-chip.selected::after {
+      content: "✓";
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: #3182ce;
+      color: #fff;
+      font-size: 10px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .qa-chip.correct {
+      background-color: #e6fffa !important;
+      border-color: var(--success-color) !important;
+    }
+    .qa-chip.correct .symbol { color: var(--success-color) !important; }
+
+    .qa-chip.wrong {
+      background-color: #fff5f5 !important;
+      border-color: var(--error-color) !important;
+    }
+    .qa-chip.wrong .symbol { color: var(--error-color) !important; }
+
+    .qa-chip.missed {
+      background-color: #fefcbf !important;
+      border-color: #d69e2e !important;
+    }
+    .qa-chip.missed .symbol { color: #744210 !important; }
+
+    /* Cat3用性質チップ */
+    .qa-prop-chip {
+      background-color: #ffffff;
+      border: 2px solid #cbd5e0;
+      border-radius: 8px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: bold;
+      color: #2d3748;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      user-select: none;
+      text-align: center;
+      position: relative;
+      flex: 1 1 calc(50% - 8px);
+      min-width: 140px;
+    }
+
+    .qa-prop-chip.group-air {
+      background-color: #fff7ed;
+    }
+    
+    .qa-prop-chip.group-water {
+      background-color: #ebe7ff;
+    }
+    
+    .qa-prop-chip.group-acid {
+      background-color: #fef2f2;
+    }
+    
+    .qa-prop-chip.group-passivity {
+      background-color: #f0fdf4;
+    }
+    
+      .qa-prop-chip:hover {
+      border-color: var(--secondary-color);
+      transform: translateY(-2px);
+    }
+
+    .qa-prop-chip:active {
+      transform: scale(0.98);
+    }
+
+    .qa-prop-chip.selected {
+      background-color: #ebf8ff;
+      border-color: #3182ce;
+      color: #2b6cb0;
+      box-shadow: 0 0 6px rgba(49, 130, 206, 0.5);
+    }
+
+    .qa-prop-chip.selected::after {
+      content: "✓";
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background: #3182ce;
+      color: #fff;
+      font-size: 10px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .qa-prop-chip.correct {
+      background-color: #e6fffa !important;
+      border-color: var(--success-color) !important;
+      color: var(--success-color) !important;
+    }
+
+    .qa-prop-chip.wrong {
+      background-color: #fff5f5 !important;
+      border-color: var(--error-color) !important;
+      color: var(--error-color) !important;
+    }
+
+    .qa-prop-chip.missed {
+      background-color: #fefcbf !important;
+      border-color: #d69e2e !important;
+      color: #744210 !important;
+    }
+
+    /* 操作ボタンエリア */
+    .qa-action-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .qa-btn {
+      flex: 1;
+      max-width: 180px;
+      padding: 10px 16px;
+      border-radius: 6px;
+      border: none;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .qa-btn-reset {
+      background-color: #e2e8f0;
+      color: #4a5568;
+    }
+    .qa-btn-reset:hover { background-color: #cbd5e0; }
+
+    .qa-btn-submit {
+      background-color: var(--secondary-color);
+      color: #ffffff;
+    }
+    .qa-btn-submit:hover { background-color: #1c5980; }
+    .qa-btn-submit:disabled { background-color: #cbd5e0; cursor: not-allowed; }
+
+    .qa-btn-next {
+      background-color: var(--success-color);
+      color: #ffffff;
+    }
+    .qa-btn-next:hover { background-color: #219150; }
+
+    /* フィードバック */
+    .qa-result-box {
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    .qa-result-box.correct {
+      background-color: #f0fff4;
+      border: 1.5px solid #9ae6b4;
+      color: #22543d;
+    }
+
+    .qa-result-box.wrong {
+      background-color: #fff5f5;
+      border: 1.5px solid #feb2b2;
+      color: #742a2a;
+    }
+
+    .qa-result-header {
+      font-weight: bold;
+      font-size: 15px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 600px) {
+      .elem-chip .symbol { font-size: 11px; }
+      .elem-chip .goro { font-size: 7.5px; }
+      .btn-grid { grid-template-columns: 1fr; }
+      .grid { grid-template-columns: 1fr; }
+      .qa-prop-chip { flex: 1 1 100%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- バージョン更新通知バナー -->
+<div id="versionNotice" class="version-notice hidden">
+  <div class="version-notice-content">
+    <span class="version-notice-title" id="versionNoticeTitle">アプリが更新されました</span>
+    <span id="versionNoticeDetail">バージョン情報が更新されました。</span>
+  </div>
+  <button class="version-notice-close" id="closeNoticeBtn">了解</button>
+</div>
+
+<!-- 固定ヘッダー -->
+<header class="sticky-header">
+  <div class="container">
+    <div class="header-container">
+      <h1>イオン化傾向暗記倶楽部</h1>
+      <span class="version-badge" id="versionBadge">v1.5.1</span>
+    </div>
+
+    <!-- モード切替タブ -->
+    <div class="mode-tabs">
+      <button class="tab-btn active" id="tabMap">マップモード</button>
+      <button class="tab-btn" id="tabList">一覧モード</button>
+      <button class="tab-btn" id="tabQa">1問1答モード</button>
+    </div>
+
+    <!-- イオン化列固定ボード -->
+    <div class="series-board" id="seriesBoard">
+      <!-- 上段: Li ～ Pb (11個) -->
+      <div class="series-grid">
+        <div class="elem-chip" data-symbol="Li"><span class="symbol">Li</span><span class="goro">リー</span></div>
+        <div class="elem-chip" data-symbol="K"><span class="symbol">K</span><span class="goro">かそ</span></div>
+        <div class="elem-chip" data-symbol="Ca"><span class="symbol">Ca</span><span class="goro">か</span></div>
+        <div class="elem-chip" data-symbol="Na"><span class="symbol">Na</span><span class="goro">な</span></div>
+        <div class="elem-chip" data-symbol="Mg"><span class="symbol">Mg</span><span class="goro">ま</span></div>
+        <div class="elem-chip" data-symbol="Al"><span class="symbol">Al</span><span class="goro">あ</span></div>
+        <div class="elem-chip" data-symbol="Zn"><span class="symbol">Zn</span><span class="goro">あ</span></div>
+        <div class="elem-chip" data-symbol="Fe"><span class="symbol">Fe</span><span class="goro">て</span></div>
+        <div class="elem-chip" data-symbol="Ni"><span class="symbol">Ni</span><span class="goro">に</span></div>
+        <div class="elem-chip" data-symbol="Sn"><span class="symbol">Sn</span><span class="goro">すん</span></div>
+        <div class="elem-chip" data-symbol="Pb"><span class="symbol">Pb</span><span class="goro">な</span></div>
+      </div>
+      <!-- 下段: H2 ～ Au (6個) -->
+      <div class="series-grid">
+        <div class="elem-chip" data-symbol="H2"><span class="symbol">(H₂)</span><span class="goro">ひ</span></div>
+        <div class="elem-chip" data-symbol="Cu"><span class="symbol">Cu</span><span class="goro">ど</span></div>
+        <div class="elem-chip" data-symbol="Hg"><span class="symbol">Hg</span><span class="goro">す</span></div>
+        <div class="elem-chip" data-symbol="Ag"><span class="symbol">Ag</span><span class="goro">ぎる</span></div>
+        <div class="elem-chip" data-symbol="Pt"><span class="symbol">Pt</span><span class="goro">借</span></div>
+        <div class="elem-chip" data-symbol="Au"><span class="symbol">Au</span><span class="goro">金</span></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <!-- 更新内容お知らせモーダルダイアログ -->
+  <div id="updateModal" class="modal-overlay hidden">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">🎉 バージョンアップのお知らせ</div>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- JSで動的に追加 -->
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn" id="closeModalBtn">閉じる</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1. マップモード表示エリア -->
+  <div id="mapModeArea" class="map-container">
+    <div class="filter-section">
+      <div class="filter-group-title">【空気との反応】</div>
+      <div class="btn-grid">
+        <button class="filter-btn" data-group="air" data-target="air_cold">常温で速やかに酸化</button>
+        <button class="filter-btn" data-group="air" data-target="air_heat">加熱により酸化</button>
+        <button class="filter-btn" data-group="air" data-target="air_strong">強熱すれば酸化</button>
+        <button class="filter-btn" data-group="air" data-target="air_none">酸化されない</button>
+      </div>
+      <div id="infoAir" class="info-box hidden"></div>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-group-title">【水との反応】</div>
+      <div class="btn-grid">
+        <button class="filter-btn" data-group="water" data-target="water_cold">常温の水と反応</button>
+        <button class="filter-btn" data-group="water" data-target="water_hot">熱水（沸騰水）と反応</button>
+        <button class="filter-btn" data-group="water" data-target="water_steam">高温水蒸気と反応</button>
+        <button class="filter-btn" data-group="water" data-target="water_none">反応しない</button>
+      </div>
+      <div id="infoWater" class="info-box hidden"></div>
+    </div>
+
+    <div class="filter-section">
+      <div class="filter-group-title">【酸との反応】</div>
+      <div class="btn-grid">
+        <button class="filter-btn" data-group="acid" data-target="acid_dilute">希塩酸・希硫酸と反応</button>
+        <button class="filter-btn" data-group="acid" data-target="acid_oxidizing">酸化性の酸でのみ溶ける(Cu, Hg, Ag)</button>
+        <button class="filter-btn" data-group="acid" data-target="passivity">不動態を形成(Al, Fe, Ni)</button>
+        <button class="filter-btn" data-group="acid" data-target="aqua_regia">王水にのみ溶ける(Pt, Au)</button>
+      </div>
+      <div id="infoAcid" class="info-box hidden"></div>
+    </div>
+  </div>
+
+  <!-- 2. 一覧モード表示エリア -->
+  <div id="listModeArea" class="list-container hidden">
+    <div class="controls">
+      <select id="reactFilter">
+        <option value="all">すべての元素・単体</option>
+        <option value="water_cold">常温の水と反応するもの</option>
+        <option value="water_hot">熱水（沸騰水）と反応するもの</option>
+        <option value="water_steam">高温水蒸気と反応するもの</option>
+        <option value="acid_dilute">希塩酸・希硫酸と反応するもの</option>
+        <option value="acid_oxidizing">酸化性の酸でのみ溶けるもの(Cu, Hg, Ag)</option>
+        <option value="passivity">不動態を形成するもの(Al, Fe, Ni)</option>
+        <option value="aqua_regia">王水にのみ溶けるもの(Pt, Au)</option>
+      </select>
+
+      <input type="text" id="searchInput" placeholder="元素名・記号・語呂・イオンで検索...">
+    </div>
+
+    <div class="count-info" id="countInfo">表示中: 0 件</div>
+    <div class="grid" id="cardGrid"></div>
+  </div>
+
+  <!-- 3. 1問1答モード表示エリア -->
+  <div id="qaModeArea" class="qa-container hidden">
+    <!-- カテゴリナビゲーション -->
+    <div class="qa-category-nav">
+      <button class="qa-cat-btn active" data-cat="cat1">1: 並べ替え</button>
+      <button class="qa-cat-btn" data-cat="cat2">2: 条件順引き</button>
+      <button class="qa-cat-btn" data-cat="cat3">3: 性質逆引き</button>
+    </div>
+
+    <!-- カテゴリ1用のサブメニュー -->
+    <div class="qa-level-selector" id="cat1Levels">
+      <button class="qa-level-btn active" data-count="2">2元素比較</button>
+      <button class="qa-level-btn" data-count="3">3元素比較</button>
+      <button class="qa-level-btn" data-count="17">全17元素チャレンジ</button>
+    </div>
+
+    <!-- カテゴリ2用のサブメニュー -->
+    <div class="qa-level-selector hidden" id="cat2Levels">
+      <div class="selector-group">
+        <span class="selector-label">出題順：</span>
+        <button class="qa-level-btn active" id="cat2OrderSequential">順番通り</button>
+        <button class="qa-level-btn" id="cat2OrderRandom">ランダム</button>
+      </div>
+
+      <span class="selector-divider">|</span>
+
+      <div class="selector-group">
+        <span class="selector-label">選択肢数：</span>
+        <button class="qa-level-btn active" id="cat2ChoicesAll">全元素 (17個)</button>
+        <button class="qa-level-btn" id="cat2Choices4">4択 (4個)</button>
+      </div>
+    </div>
+
+    <!-- カテゴリ3用のサブメニュー -->
+    <div class="qa-level-selector hidden" id="cat3Levels">
+      <div class="selector-group">
+        <span class="selector-label">出題順：</span>
+        <button class="qa-level-btn active" id="cat3OrderSequential">順番通り</button>
+        <button class="qa-level-btn" id="cat3OrderRandom">ランダム</button>
+      </div>
+    </div>
+
+    <!-- メイン問題カード -->
+    <div class="qa-card" id="qaCard">
+      <div class="qa-question-header">
+        <div class="qa-question-title" id="qaQuestionTitle">
+          問題文がここに入ります
+        </div>
+        <span class="qa-progress-badge hidden" id="qaProgressBadge">問 1 / 13</span>
+      </div>
+
+      <!-- 解答トレイ（Cat1用） -->
+      <div class="qa-tray-container" id="qaTrayContainer">
+        <div class="qa-tray-label">
+          <span>あなたの解答（高 → 低）</span>
+          <span style="font-size: 10px; font-weight: normal; color: #718096;">※タップで取り消せます</span>
+        </div>
+        <div class="qa-tray-chips" id="qaTrayChips">
+          <div class="qa-tray-placeholder">下のチップをタップして順番に選んでください</div>
+        </div>
+      </div>
+
+      <!-- 選択肢エリア -->
+      <div class="qa-choices-container">
+        <div class="qa-choices-label" id="qaChoicesLabel">選択肢</div>
+        <div class="qa-choices-chips" id="qaChoicesChips"></div>
+      </div>
+
+      <!-- アクションボタン -->
+      <div class="qa-action-row">
+        <button class="qa-btn qa-btn-reset" id="qaResetBtn">やり直す</button>
+        <button class="qa-btn qa-btn-submit" id="qaSubmitBtn" disabled>判定する</button>
+        <button class="qa-btn qa-btn-next hidden" id="qaNextBtn">次の問題へ</button>
+      </div>
+
+      <!-- 結果・解説ボックス -->
+      <div class="qa-result-box hidden" id="qaResultBox"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ==========================================
+  // バージョン管理・更新履歴設定
+  // ==========================================
+  const CURRENT_VERSION = "1.5.1";
+  const STORAGE_KEY_VERSION = "ionization_app_version";
+
+  const UPDATES_HISTORY = [
+    {
+      version: "1.5.1",
+      date: "2026-09-23",
+      changes: [
+        "色分けやボタンなど微修正"
+      ]
+    },
+    {
+      version: "1.5.0",
+      date: "2026-09-23",
+      changes: [
+        "1問1答モード「3: 性質逆引き」を全面開放",
+        "提示された元素・単体の反応性や化学的性質（空気・水・酸・不動態など）を当てるクイズ機能を追加",
+        "「順番通り」「ランダム」の出題順切り替えに対応"
+      ]
+    },
+    {
+      version: "1.4.0",
+      date: "2026-09-23",
+      changes: [
+        "カテゴリ2「条件順引き」に『4択（4個）』モードを追加",
+        "設定欄から『全元素 (17個)』と『4択 (4個)』をワンタップ切替可能に",
+        "4択モード時は正解が必ず1〜4個含まれる動的生成ロジックを搭載"
+      ]
+    },
+    {
+      version: "1.3.0",
+      date: "2026-09-23",
+      changes: [
+        "1問1答モード「2: 条件順引き」を全面開放",
+        "空気・水・酸との反応、不動態、王水、水素基準など全13問を網羅",
+        "「順番通り」「ランダム」の出題順切り替え機能を追加"
+      ]
+    }
+  ];
+
+  function checkVersionUpdate() {
+    const savedVersion = localStorage.getItem(STORAGE_KEY_VERSION);
+    const versionBadge = document.getElementById("versionBadge");
+    const versionNotice = document.getElementById("versionNotice");
+    const versionNoticeTitle = document.getElementById("versionNoticeTitle");
+    const versionNoticeDetail = document.getElementById("versionNoticeDetail");
+
+    if (versionBadge) versionBadge.textContent = `v${CURRENT_VERSION}`;
+
+    if (!savedVersion) {
+      if (versionNoticeTitle) versionNoticeTitle.textContent = "アプリへようこそ！";
+      if (versionNoticeDetail) versionNoticeDetail.textContent = `最新バージョン (v${CURRENT_VERSION}) をご利用いただけます。`;
+      if (versionNotice) versionNotice.classList.remove("hidden");
+      openUpdateModal([UPDATES_HISTORY[0]]);
+
+    } else if (compareVersions(CURRENT_VERSION, savedVersion) > 0) {
+      if (versionNoticeTitle) versionNoticeTitle.textContent = "アプリが更新されました！";
+      if (versionNoticeDetail) versionNoticeDetail.textContent = `v${savedVersion} から v${CURRENT_VERSION} にアップデートされました。`;
+      if (versionNotice) versionNotice.classList.remove("hidden");
+
+      const newHistories = UPDATES_HISTORY.filter(item => compareVersions(item.version, savedVersion) > 0);
+      openUpdateModal(newHistories.length > 0 ? newHistories : [UPDATES_HISTORY[0]]);
+    }
+
+    const closeNoticeBtn = document.getElementById("closeNoticeBtn");
+    if (closeNoticeBtn) {
+      closeNoticeBtn.onclick = () => {
+        localStorage.setItem(STORAGE_KEY_VERSION, CURRENT_VERSION);
+        if (versionNotice) versionNotice.classList.add("hidden");
+      };
+    }
+
+    const closeModalBtn = document.getElementById("closeModalBtn");
+    if (closeModalBtn) {
+      closeModalBtn.onclick = () => {
+        localStorage.setItem(STORAGE_KEY_VERSION, CURRENT_VERSION);
+        const updateModal = document.getElementById("updateModal");
+        if (updateModal) updateModal.classList.add("hidden");
+      };
+    }
+
+    if (versionBadge) {
+      versionBadge.onclick = () => openUpdateModal(UPDATES_HISTORY);
+    }
+  }
+
+  function openUpdateModal(historyData) {
+    const modal = document.getElementById("updateModal");
+    const modalBody = document.getElementById("modalBody");
+    if (!modal || !modalBody) return;
+    
+    let html = "";
+    historyData.forEach(item => {
+      html += `<div style="margin-bottom: 12px; border-bottom: 1px dashed #ccc; padding-bottom: 8px;">`;
+      html += `<strong>v${item.version}</strong> <span style="font-size: 11px; color: #666;">(${item.date || ''})</span>`;
+      html += `<ul style="margin: 4px 0 0 18px; padding: 0; font-size: 13px;">`;
+      item.changes.forEach(change => html += `<li>${change}</li>`);
+      html += `</ul></div>`;
+    });
+
+    modalBody.innerHTML = html;
+    modal.classList.remove("hidden");
+  }
+
+  function compareVersions(v1, v2) {
+    if (!v1 || !v2) return 0;
+    const p1 = v1.split('.').map(Number);
+    const p2 = v2.split('.').map(Number);
+    for (let i = 0; i < Math.max(p1.length, p2.length); i++) {
+      const num1 = p1[i] || 0;
+      const num2 = p2[i] || 0;
+      if (num1 > num2) return 1;
+      if (num1 < num2) return -1;
+    }
+    return 0;
+  }
+
+  // ==========================================
+  // データベース
+  // ==========================================
+  const ionizationData = [
+    { rank: 1, symbol: "Li", name: "リチウム", ion: "Li⁺", goro: "リーさん", air: "常温で速やかに酸化", water: "常温の水と反応（H₂発生）", acid: "希塩酸・希硫酸と反応（H₂発生）", tags: ["常温水", "希酸"] },
+    { rank: 2, symbol: "K", name: "カリウム", ion: "K⁺", goro: "貸そう", air: "常温で速やかに酸化", water: "常温の水と反応（H₂発生）", acid: "希塩酸・希硫酸と反応（H₂発生）", tags: ["常温水", "希酸"] },
+    { rank: 3, symbol: "Ca", name: "カルシウム", ion: "Ca²⁺", goro: "か", air: "常温で速やかに酸化", water: "常温の水と反応（H₂発生）", acid: "希塩酸・希硫酸と反応（H₂発生）", tags: ["常温水", "希酸"] },
+    { rank: 4, symbol: "Na", name: "ナトリウム", ion: "Na⁺", goro: "な", air: "常温で速やかに酸化", water: "常温の水と反応（H₂発生）", acid: "希塩酸・希硫酸と反応（H₂発生）", tags: ["常温水", "希酸"] },
+    { rank: 5, symbol: "Mg", name: "マグネシウム", ion: "Mg²⁺", goro: "ま", air: "加熱により酸化", water: "熱水（沸騰水）と反応（H₂発生）", acid: "希塩酸・希硫酸と反応（H₂発生）", tags: ["熱水", "希酸"] },
+    { rank: 6, symbol: "Al", name: "アルミニウム", ion: "Al³⁺", goro: "あ", air: "加熱により酸化", water: "高温水蒸気と反応（H₂発生）", acid: "希塩酸・希硫酸と反応（H₂発生）<br>※濃硝酸とは不動態を生じる", tags: ["高温水蒸気", "希酸", "不動態"] },
+    { rank: 7, symbol: "Zn", name: "亜鉛", ion: "Zn²⁺", goro: "あ", air: "強熱すれば酸化", water: "高温水蒸気と反応（H₂発生）", acid: "希塩酸・希硫酸と反応（H₂発生）", tags: ["高温水蒸気", "希酸"] },
+    { rank: 8, symbol: "Fe", name: "鉄", ion: "Fe²⁺/Fe³⁺", goro: "て", air: "強熱すれば酸化", water: "高温水蒸気と反応（H₂発生）", acid: "希塩酸・希硫酸と反応（H₂発生）<br>※濃硝酸とは不動態を生じる", tags: ["高温水蒸気", "希酸", "不動態"] },
+    { rank: 9, symbol: "Ni", name: "ニッケル", ion: "Ni²⁺", goro: "に", air: "強熱すれば酸化", water: "反応しない", acid: "希塩酸・希硫酸と反応（H₂発生）<br>※濃硝酸とは不動態を生じる", tags: ["希酸", "不動態"] },
+    { rank: 10, symbol: "Sn", name: "スズ", ion: "Sn²⁺/Sn⁴⁺", goro: "すん", air: "強熱すれば酸化", water: "反応しない", acid: "希塩酸・希硫酸と反応（H₂発生）", tags: ["希酸"] },
+    { rank: 11, symbol: "Pb", name: "鉛", ion: "Pb²⁺", goro: "な", air: "強熱すれば酸化", water: "反応しない", acid: "希塩酸・希硫酸に溶けにくい（難溶性塩を形成）", tags: ["希酸難溶"] },
+    { rank: 12, symbol: "H2", displaySymbol: "H₂", name: "水素", ion: "H⁺", goro: "ひ", air: "-", water: "-", acid: "（酸と金属の反応の基準点）", tags: ["イオン化傾向の基準"] },
+    { rank: 13, symbol: "Cu", name: "銅", ion: "Cu²⁺", goro: "ど", air: "強熱すれば酸化", water: "反応しない", acid: "酸化性の酸（硝酸・熱濃硫酸）に溶ける", tags: ["酸化性の酸"] },
+    { rank: 14, symbol: "Hg", name: "水銀", ion: "Hg²⁺", goro: "す", air: "強熱すれば酸化", water: "反応しない", acid: "酸化性の酸（硝酸・熱濃硫酸）に溶ける", tags: ["酸化性の酸"] },
+    { rank: 15, symbol: "Ag", name: "銀", ion: "Ag⁺", goro: "ぎる", air: "酸化されない", water: "反応しない", acid: "酸化性の酸（硝酸・熱濃硫酸）に溶ける", tags: ["酸化性の酸"] },
+    { rank: 16, symbol: "Pt", name: "白金", ion: "Pt⁴⁺", goro: "借", air: "酸化されない", water: "反応しない", acid: "王水にのみ溶ける", tags: ["王水のみ"] },
+    { rank: 17, symbol: "Au", name: "金", ion: "Au³⁺", goro: "金", air: "酸化されない", water: "反応しない", acid: "王水にのみ溶ける", tags: ["王水のみ"] }
+  ];
+
+  // カテゴリ2：条件順引き 全網羅問題データベース
+  const cat2QuestionsDatabase = [
+    {
+      id: 1,
+      category: "空気",
+      question: "常温の空気中で速やかに酸化され、金属光沢を失う金属をすべて選んでください。",
+      answers: ["Li", "K", "Ca", "Na"],
+      explanation: "Li, K, Ca, Na はイオン化傾向が非常に大きく、常温の空気中の酸素と速やかに反応します。そのため灯油（石油）中に保存します。"
+    },
+    {
+      id: 2,
+      category: "空気",
+      question: "常温の空気中では比較的安定だが、加熱することによって酸化される金属をすべて選んでください。",
+      answers: ["Mg", "Al"],
+      explanation: "Mg, Al は空気中で加熱すると燃焼または急速に酸化されます。"
+    },
+    {
+      id: 3,
+      category: "空気",
+      question: "強く加熱（強熱）することで初めて表面が酸化される金属をすべて選んでください。",
+      answers: ["Zn", "Fe", "Ni", "Sn", "Pb", "Cu", "Hg"],
+      explanation: "Zn から Hg までの金属は、強熱することで酸化物を生成します。"
+    },
+    {
+      id: 4,
+      category: "空気",
+      question: "加熱しても空気中の酸素によって酸化されない金属をすべて選んでください。",
+      answers: ["Ag", "Pt", "Au"],
+      explanation: "Ag, Pt, Au はイオン化傾向が非常に小さく、高熱に晒しても酸化されず単体のまま存在します。"
+    },
+    {
+      id: 5,
+      category: "水",
+      question: "常温の水と激しく反応して、水素（H₂）を発生する金属をすべて選んでください。",
+      answers: ["Li", "K", "Ca", "Na"],
+      explanation: "Li, K, Ca, Na は常温の水と反応して水素（H₂）を発生し、水酸化物（強塩基）になります。"
+    },
+    {
+      id: 6,
+      category: "水",
+      question: "常温の水とは反応しないが、熱水（沸騰水）と反応して水素（H₂）を発生する金属をすべて選んでください。",
+      answers: ["Mg"],
+      explanation: "Mg（マグネシウム）は常温の水とは反応しづらいですが、熱水となら反応して水酸化マグネシウムと水素（H₂）を生じます。"
+    },
+    {
+      id: 7,
+      category: "水",
+      question: "水（常温・熱水）とは反応しないが、高温の水蒸気と反応して水素（H₂）を発生する金属をすべて選んでください。",
+      answers: ["Al", "Zn", "Fe"],
+      explanation: "Al, Zn, Fe は赤熱した状態などで高温の水蒸気と反応し、酸化物と水素（H₂）を生じます。"
+    },
+    {
+      id: 8,
+      category: "水",
+      question: "水や水蒸気とは全く反応しない金属をすべて選んでください。",
+      answers: ["Ni", "Sn", "Pb", "Cu", "Hg", "Ag", "Pt", "Au"],
+      explanation: "Ni 以降の金属は、常温の水・熱水・高温水蒸気のいずれとも反応しません。"
+    },
+    {
+      id: 9,
+      category: "酸",
+      question: "希塩酸や希硫酸に溶けて、水素（H₂）を発生する金属をすべて選んでください。",
+      answers: ["Li", "K", "Ca", "Na", "Mg", "Al", "Zn", "Fe", "Ni", "Sn", "Pb"],
+      explanation: "H₂ よりイオン化傾向が大きい Li〜Pb までの金属は、希塩酸や希硫酸などの酸に溶けて水素（H₂）を発生します（※Pbは表面に不溶性塩が生じて反応が途中で止まります）。"
+    },
+    {
+      id: 10,
+      category: "酸",
+      question: "希塩酸や希硫酸には溶けないが、酸化性の酸（濃硝酸・希硝酸・熱濃硫酸）には溶ける金属をすべて選んでください。",
+      answers: ["Cu", "Hg", "Ag"],
+      explanation: "Cu, Hg, Ag は H₂ よりイオン化傾向が小さいため希酸から H₂ を発生させられませんが、強い酸化力を持つ酸化性の酸（硝酸・熱濃硫酸）には溶けます。"
+    },
+    {
+      id: 11,
+      category: "酸",
+      question: "濃硝酸に入れると表面に不動態（緻密な酸化被膜）を形成し、内部が溶けなくなる金属をすべて選んでください。",
+      answers: ["Al", "Fe", "Ni"],
+      explanation: "Al, Fe, Ni （アルミ・鉄・ニッケル）は濃硝酸に接触すると、表面に非常に緻密で安定な酸化被膜（不動態）を作るため、内部まで溶け進まなくなります。"
+    },
+    {
+      id: 12,
+      category: "酸",
+      question: "酸化性の酸にも溶けず、王水（濃塩酸と濃硝酸を3:1で混ぜた液）にのみ溶ける金属をすべて選んでください。",
+      answers: ["Pt", "Au"],
+      explanation: "Pt（白金）と Au（金）は非常にイオン化傾向が小さく安定ですが、王水に浸すと錯イオンを形成して溶けることができます。"
+    },
+    {
+      id: 13,
+      category: "基準",
+      question: "イオン化傾向が水素（H₂）より小さく、希酸から水素を発生させることができない金属をすべて選んでください。",
+      answers: ["Cu", "Hg", "Ag", "Pt", "Au"],
+      explanation: "H₂ より右側に位置する Cu, Hg, Ag, Pt, Au の5つの金属は、イオン化傾向が H₂ より小さいため希酸と反応して H₂ を生じません。"
+    }
+  ];
+
+  // カテゴリ3：性質逆引き用性質マスター定義
+  const cat3PropertyList = [
+    { id: "p_air_cold", group: "air", label: "常温の空気で速やかに酸化" },
+    { id: "p_air_heat", group: "air", label: "加熱により空気中で酸化" },
+    { id: "p_air_strong", group: "air", label: "強熱することで空気中で酸化" },
+    { id: "p_air_none", group: "air", label: "加熱しても空気中で酸化されない" },
+  
+    { id: "p_water_cold", group: "water", label: "常温の水と反応してH₂発生" },
+    { id: "p_water_hot", group: "water", label: "熱水（沸騰水）と反応してH₂発生" },
+    { id: "p_water_steam", group: "water", label: "高温水蒸気と反応してH₂発生" },
+    { id: "p_water_none", group: "water", label: "水や水蒸気とは反応しない" },
+  
+    { id: "p_acid_dilute", group: "acid", label: "希塩酸・希硫酸に溶けてH₂発生" },
+    { id: "p_acid_oxidizing", group: "acid", label: "酸化性の酸（硝酸・熱濃硫酸）になら溶ける" },
+    { id: "p_acid_aqua", group: "acid", label: "王水にのみ溶ける" },
+  
+    { id: "p_acid_passivity", group: "passivity", label: "濃硝酸で不動態（被膜）を形成" }
+  ];
+
+  // カテゴリ3：各元素の正解性質マッピング
+  const elementPropertiesMap = {
+    Li: ["p_air_cold", "p_water_cold", "p_acid_dilute"],
+    K:  ["p_air_cold", "p_water_cold", "p_acid_dilute"],
+    Ca: ["p_air_cold", "p_water_cold", "p_acid_dilute"],
+    Na: ["p_air_cold", "p_water_cold", "p_acid_dilute"],
+    Mg: ["p_air_heat", "p_water_hot", "p_acid_dilute"],
+    Al: ["p_air_heat", "p_water_steam", "p_acid_dilute", "p_acid_passivity"],
+    Zn: ["p_air_strong", "p_water_steam", "p_acid_dilute"],
+    Fe: ["p_air_strong", "p_water_steam", "p_acid_dilute", "p_acid_passivity"],
+    Ni: ["p_air_strong", "p_water_none", "p_acid_dilute", "p_acid_passivity"],
+    Sn: ["p_air_strong", "p_water_none", "p_acid_dilute"],
+    Pb: ["p_air_strong", "p_water_none", "p_acid_dilute"],
+    Cu: ["p_air_strong", "p_water_none", "p_acid_oxidizing"],
+    Hg: ["p_air_strong", "p_water_none", "p_acid_oxidizing"],
+    Ag: ["p_air_none", "p_water_none", "p_acid_oxidizing"],
+    Pt: ["p_air_none", "p_water_none", "p_acid_aqua"],
+    Au: ["p_air_none", "p_water_none", "p_acid_aqua"]
+  };
+
+  const mapHighlightRules = {
+    air_cold: { targets: ["Li", "K", "Ca", "Na"], desc: "【常温で速やかに酸化】Li, K, Ca, Na は空気中の酸素と速やかに反応し、表面の金属光沢を失います。灯油中に保存します。" },
+    air_heat: { targets: ["Mg", "Al"], desc: "【加熱により酸化】Mg, Al は空気中で加熱すると燃焼または酸化されます。" },
+    air_strong: { targets: ["Zn", "Fe", "Ni", "Sn", "Pb", "Cu", "Hg"], desc: "【強熱すれば酸化】Zn から Hg までの金属は、強く加熱（強熱）することで表面が酸化されます。" },
+    air_none: { targets: ["Ag", "Pt", "Au"], desc: "【酸化されない】Ag, Pt, Au は加熱しても酸化されず、単体として非常に安定です。" },
+    water_cold: { targets: ["Li", "K", "Ca", "Na"], desc: "【常温の水と反応】Li, K, Ca, Na は常温の水と激しく反応し、水素（H₂）を発生して水酸化物（強塩基）になります。" },
+    water_hot: { targets: ["Mg"], desc: "【熱水と反応】Mg は常温の水とはほとんど反応しませんが、熱水（沸騰水）とは反応して H₂ を発生します。" },
+    water_steam: { targets: ["Al", "Zn", "Fe"], desc: "【高温水蒸気と反応】Al, Zn, Fe は高温の水蒸気と反応して H₂ を発生し、酸化物になります。" },
+    water_none: { targets: ["Ni", "Sn", "Pb", "H2", "Cu", "Hg", "Ag", "Pt", "Au"], desc: "【水と反応しない】Ni 以降の金属は、水や水蒸気とは反応しません。" },
+    acid_dilute: { targets: ["Li", "K", "Ca", "Na", "Mg", "Al", "Zn", "Fe", "Ni", "Sn", "Pb"], desc: "【希塩酸・希硫酸と反応】H₂ よりイオン化傾向が大きい金属（Li〜Pb）は、希酸に溶けて水素（H₂）を発生します（※Pbは表面に難溶性塩ができるため途中で停止）。" },
+    acid_oxidizing: { targets: ["Cu", "Hg", "Ag"], desc: "【酸化性の酸でのみ溶ける】Cu, Hg, Ag は希塩酸などには溶けませんが、酸化性の酸（濃硝酸・希硝酸・熱濃硫酸）とは反応して溶けます。" },
+    passivity: { targets: ["Al", "Fe", "Ni"], desc: "【不動態を形成】Al, Fe, Ni は濃硝酸に入れると表面に緻密な酸化被膜（不動態）が形成され、内部まで溶けなくなります。" },
+    aqua_regia: { targets: ["Pt", "Au"], desc: "【王水にのみ溶ける】Pt, Au は酸化性の酸にも溶けませんが、王水（濃塩酸と濃硝酸を3:1の体積比で混合した液）には錯イオンを形成して溶けます。" }
+  };
+
+  // DOM参照
+  const seriesBoard = document.getElementById("seriesBoard");
+  const tabMap = document.getElementById("tabMap");
+  const tabList = document.getElementById("tabList");
+  const tabQa = document.getElementById("tabQa");
+  const mapModeArea = document.getElementById("mapModeArea");
+  const listModeArea = document.getElementById("listModeArea");
+  const qaModeArea = document.getElementById("qaModeArea");
+
+  const filterBtns = document.querySelectorAll(".filter-btn");
+  const elemChips = document.querySelectorAll(".elem-chip");
+
+  const infoBoxes = {
+    air: document.getElementById("infoAir"),
+    water: document.getElementById("infoWater"),
+    acid: document.getElementById("infoAcid")
+  };
+
+  const reactFilter = document.getElementById("reactFilter");
+  const searchInput = document.getElementById("searchInput");
+  const cardGrid = document.getElementById("cardGrid");
+  const countInfo = document.getElementById("countInfo");
+
+  // モード切替制御
+  let mapScrollPos = 0;
+  let listScrollPos = 0;
+  let qaScrollPos = 0;
+
+  function clearMapState() {
+    filterBtns.forEach(b => b.classList.remove("active"));
+    resetHighlights();
+    hideAllInfoBoxes();
+  }
+
+  tabMap.addEventListener("click", () => {
+    if (tabMap.classList.contains("active")) return;
+
+    if (tabList.classList.contains("active")) listScrollPos = window.scrollY;
+    if (tabQa.classList.contains("active")) qaScrollPos = window.scrollY;
+
+    tabMap.classList.add("active");
+    tabList.classList.remove("active");
+    tabQa.classList.remove("active");
+    
+    mapModeArea.classList.remove("hidden");
+    listModeArea.classList.add("hidden");
+    qaModeArea.classList.add("hidden");
+    seriesBoard.classList.remove("hidden");
+
+    window.scrollTo(0, mapScrollPos);
+  });
+
+  tabList.addEventListener("click", () => {
+    if (tabList.classList.contains("active")) return;
+
+    if (tabMap.classList.contains("active")) mapScrollPos = window.scrollY;
+    if (tabQa.classList.contains("active")) qaScrollPos = window.scrollY;
+
+    tabList.classList.add("active");
+    tabMap.classList.remove("active");
+    tabQa.classList.remove("active");
+
+    listModeArea.classList.remove("hidden");
+    mapModeArea.classList.add("hidden");
+    qaModeArea.classList.add("hidden");
+    seriesBoard.classList.remove("hidden");
+
+    clearMapState();
+    renderList();
+
+    window.scrollTo(0, listScrollPos);
+  });
+
+  tabQa.addEventListener("click", () => {
+    if (tabQa.classList.contains("active")) return;
+
+    if (tabMap.classList.contains("active")) mapScrollPos = window.scrollY;
+    if (tabList.classList.contains("active")) listScrollPos = window.scrollY;
+
+    tabQa.classList.add("active");
+    tabMap.classList.remove("active");
+    tabList.classList.remove("active");
+
+    qaModeArea.classList.remove("hidden");
+    mapModeArea.classList.add("hidden");
+    listModeArea.classList.add("hidden");
+    
+    seriesBoard.classList.add("hidden");
+
+    clearMapState();
+    initQaMode();
+
+    window.scrollTo(0, qaScrollPos);
+  });
+
+  // マップモード制御
+  filterBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const targetRuleKey = btn.getAttribute("data-target");
+      const groupKey = btn.getAttribute("data-group");
+
+      if (btn.classList.contains("active")) {
+        btn.classList.remove("active");
+        resetHighlights();
+        hideAllInfoBoxes();
+      } else {
+        filterBtns.forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        applyHighlight(targetRuleKey, groupKey);
+      }
+    });
+  });
+
+  function applyHighlight(ruleKey, groupKey) {
+    const rule = mapHighlightRules[ruleKey];
+    if (!rule) return;
+
+    elemChips.forEach(chip => {
+      const sym = chip.getAttribute("data-symbol");
+      if (rule.targets.includes(sym)) {
+        chip.classList.add("highlight");
+        chip.classList.remove("dimmed");
+      } else {
+        chip.classList.remove("highlight");
+        chip.classList.add("dimmed");
+      }
+    });
+
+    hideAllInfoBoxes();
+    if (infoBoxes[groupKey]) {
+      infoBoxes[groupKey].textContent = rule.desc;
+      infoBoxes[groupKey].classList.remove("hidden");
+    }
+  }
+
+  function resetHighlights() {
+    elemChips.forEach(chip => {
+      chip.classList.remove("highlight");
+      chip.classList.remove("dimmed");
+    });
+  }
+
+  function hideAllInfoBoxes() {
+    Object.values(infoBoxes).forEach(box => {
+      if (box) box.classList.add("hidden");
+    });
+  }
+
+  // 一覧モード制御
+  function getFilteredData() {
+    const keyword = searchInput.value.toLowerCase().trim();
+    const filterVal = reactFilter.value;
+
+    return ionizationData.filter(item => {
+      const matchKey = item.name.includes(keyword) || 
+                       item.symbol.toLowerCase().includes(keyword) || 
+                       item.ion.toLowerCase().includes(keyword) ||
+                       item.goro.includes(keyword) ||
+                       item.air.includes(keyword) ||
+                       item.water.includes(keyword) ||
+                       item.acid.includes(keyword);
+
+      if (!matchKey) return false;
+
+      if (filterVal === "water_cold") return item.tags.includes("常温水");
+      if (filterVal === "water_hot") return item.tags.includes("熱水");
+      if (filterVal === "water_steam") return item.tags.includes("高温水蒸気");
+      if (filterVal === "acid_dilute") return item.tags.includes("希酸") || item.tags.includes("希酸難溶");
+      if (filterVal === "acid_oxidizing") return item.tags.includes("酸化性の酸");
+      if (filterVal === "passivity") return item.tags.includes("不動態");
+      if (filterVal === "aqua_regia") return item.tags.includes("王水のみ");
+
+      return true;
+    });
+  }
+
+  function renderList() {
+    const filtered = getFilteredData();
+    cardGrid.innerHTML = "";
+
+    filtered.forEach(item => {
+      const card = document.createElement("div");
+      card.className = "card";
+
+      const tagsHtml = item.tags.length > 0
+        ? item.tags.map(t => `<span class="info-tag">${t}</span>`).join("")
+        : `<span class="info-tag" style="background:none; color:#a0aec0; padding:0;">なし</span>`;
+
+      card.innerHTML = `
+        <div class="card-row-1">
+          <div class="row-1-left">
+            <span class="element-symbol">${item.displaySymbol || item.symbol}</span>
+            <span class="element-goro">${item.goro}</span>
+            <span class="element-name">${item.name}</span>
+          </div>
+          <span class="element-ion">${item.ion}</span>
+        </div>
+        <div class="card-row-2">
+          <div class="react-item">
+            <span class="react-label">【空気】</span>
+            <span class="react-value">${item.air}</span>
+          </div>
+          <div class="react-item">
+            <span class="react-label">【水】</span>
+            <span class="react-value">${item.water}</span>
+          </div>
+          <div class="react-item">
+            <span class="react-label">【酸】</span>
+            <span class="react-value">${item.acid}</span>
+          </div>
+        </div>
+        <div class="card-row-3">
+          <div class="info-tag-container">${tagsHtml}</div>
+        </div>
+      `;
+      cardGrid.appendChild(card);
+    });
+
+    countInfo.textContent = `表示中: ${filtered.length} 件 / 全 ${ionizationData.length} 件`;
+  }
+
+  reactFilter.addEventListener("change", renderList);
+  searchInput.addEventListener("input", renderList);
+
+  // ==========================================
+  // 1問1答モード（Cat1, Cat2, Cat3）制御
+  // ==========================================
+  let activeCategory = "cat1"; // cat1, cat2, cat3
+
+  // --- Cat1 状態変数 ---
+  let currentCount = 2;
+  let currentTargets = [];
+  let userSelection = [];
+  let remainingChoices = [];
+
+  // --- Cat2 状態変数 ---
+  let cat2IsRandom = false;
+  let cat2ChoiceMode = "all"; // "all" (17個) または "four" (4個)
+  let cat2QuestionList = [];
+  let cat2CurrentIndex = 0;
+  let cat2SelectedSymbols = new Set();
+  let cat2CurrentChoices = [];
+
+  // --- Cat3 状態変数 ---
+  let cat3IsRandom = false;
+  let cat3QuestionList = [];
+  let cat3CurrentIndex = 0;
+  let cat3SelectedProps = new Set();
+
+  // DOM要素
+  const qaCatBtns = document.querySelectorAll(".qa-cat-btn");
+  const cat1Levels = document.getElementById("cat1Levels");
+  const cat2Levels = document.getElementById("cat2Levels");
+  const cat3Levels = document.getElementById("cat3Levels");
+
+  const cat2OrderSequential = document.getElementById("cat2OrderSequential");
+  const cat2OrderRandom = document.getElementById("cat2OrderRandom");
+  const cat2ChoicesAll = document.getElementById("cat2ChoicesAll");
+  const cat2Choices4 = document.getElementById("cat2Choices4");
+
+  const cat3OrderSequential = document.getElementById("cat3OrderSequential");
+  const cat3OrderRandom = document.getElementById("cat3OrderRandom");
+
+  const qaCard = document.getElementById("qaCard");
+  const qaQuestionTitle = document.getElementById("qaQuestionTitle");
+  const qaProgressBadge = document.getElementById("qaProgressBadge");
+  const qaTrayContainer = document.getElementById("qaTrayContainer");
+  const qaTrayChips = document.getElementById("qaTrayChips");
+  const qaChoicesLabel = document.getElementById("qaChoicesLabel");
+  const qaChoicesChips = document.getElementById("qaChoicesChips");
+
+  const qaSubmitBtn = document.getElementById("qaSubmitBtn");
+  const qaResetBtn = document.getElementById("qaResetBtn");
+  const qaNextBtn = document.getElementById("qaNextBtn");
+  const qaResultBox = document.getElementById("qaResultBox");
+
+  const levelBtns = document.querySelectorAll("#cat1Levels .qa-level-btn");
+
+  // カテゴリ切替
+  qaCatBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      qaCatBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeCategory = btn.getAttribute("data-cat");
+
+      if (activeCategory === "cat1") {
+        cat1Levels.classList.remove("hidden");
+        cat2Levels.classList.add("hidden");
+        cat3Levels.classList.add("hidden");
+        qaTrayContainer.classList.remove("hidden");
+        qaProgressBadge.classList.add("hidden");
+        qaChoicesLabel.textContent = "選択肢";
+        generateQuestionCat1();
+      } else if (activeCategory === "cat2") {
+        cat1Levels.classList.add("hidden");
+        cat2Levels.classList.remove("hidden");
+        cat3Levels.classList.add("hidden");
+        qaTrayContainer.classList.add("hidden");
+        qaProgressBadge.classList.remove("hidden");
+        qaChoicesLabel.textContent = "該当する元素を選択してください（タップで切り替え）";
+        initCat2Queue();
+      } else if (activeCategory === "cat3") {
+        cat1Levels.classList.add("hidden");
+        cat2Levels.classList.add("hidden");
+        cat3Levels.classList.remove("hidden");
+        qaTrayContainer.classList.add("hidden");
+        qaProgressBadge.classList.remove("hidden");
+        qaChoicesLabel.textContent = "当てはまる性質をすべてタップして選択してください";
+        initCat3Queue();
+      }
+    });
+  });
+
+  function initQaMode() {
+    if (activeCategory === "cat1" && currentTargets.length === 0) {
+      generateQuestionCat1();
+    } else if (activeCategory === "cat2") {
+      initCat2Queue();
+    } else if (activeCategory === "cat3") {
+      initCat3Queue();
+    }
+  }
+
+  // --- Cat1: 並べ替え制御 ---
+  levelBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      levelBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentCount = parseInt(btn.getAttribute("data-count"), 10);
+      generateQuestionCat1();
+    });
+  });
+
+  function generateQuestionCat1() {
+    userSelection = [];
+    qaResultBox.classList.add("hidden");
+    qaResultBox.className = "qa-result-box hidden";
+    qaSubmitBtn.classList.remove("hidden");
+    qaNextBtn.classList.add("hidden");
+    qaSubmitBtn.disabled = true;
+
+    if (currentCount === 17) {
+      qaQuestionTitle.textContent = "全17元素を、イオン化傾向が高い順（左から順）にすべて正しく並べ替えてください。";
+    } else {
+      qaQuestionTitle.textContent = `次の ${currentCount} つの元素を、イオン化傾向が高い順（左から順）にタップしてください。`;
+    }
+
+    if (currentCount === 17) {
+      currentTargets = [...ionizationData].sort((a, b) => a.rank - b.rank);
+    } else {
+      const shuffled = [...ionizationData].sort(() => Math.random() - 0.5);
+      const selected = shuffled.slice(0, currentCount);
+      currentTargets = selected.sort((a, b) => a.rank - b.rank);
+    }
+
+    remainingChoices = [...currentTargets].sort(() => Math.random() - 0.5);
+    renderQaChipsCat1();
+  }
+
+  function renderQaChipsCat1() {
+    qaTrayChips.innerHTML = "";
+    if (userSelection.length === 0) {
+      qaTrayChips.innerHTML = `<div class="qa-tray-placeholder">下のチップをタップして順番に選んでください</div>`;
+    } else {
+      userSelection.forEach((item, idx) => {
+        const chip = document.createElement("div");
+        chip.className = "qa-chip";
+        chip.innerHTML = `<span class="symbol">${item.displaySymbol || item.symbol}</span>`;
+        chip.title = "タップして戻す";
+        chip.addEventListener("click", () => removeFromTrayCat1(idx));
+        qaTrayChips.appendChild(chip);
+      });
+    }
+
+    qaChoicesChips.innerHTML = "";
+    remainingChoices.forEach((item) => {
+      const chip = document.createElement("div");
+      chip.className = "qa-chip";
+      chip.innerHTML = `<span class="symbol">${item.displaySymbol || item.symbol}</span>`;
+      chip.addEventListener("click", () => addToTrayCat1(item));
+      qaChoicesChips.appendChild(chip);
+    });
+
+    qaSubmitBtn.disabled = userSelection.length !== currentTargets.length;
+  }
+
+  function addToTrayCat1(item) {
+    userSelection.push(item);
+    remainingChoices = remainingChoices.filter(c => c.symbol !== item.symbol);
+    renderQaChipsCat1();
+  }
+
+  function removeFromTrayCat1(index) {
+    const removed = userSelection.splice(index, 1)[0];
+    remainingChoices.push(removed);
+    renderQaChipsCat1();
+  }
+
+  // --- Cat2: 条件順引き制御 ---
+  cat2OrderSequential.addEventListener("click", () => {
+    cat2OrderSequential.classList.add("active");
+    cat2OrderRandom.classList.remove("active");
+    cat2IsRandom = false;
+    initCat2Queue();
+  });
+
+  cat2OrderRandom.addEventListener("click", () => {
+    cat2OrderRandom.classList.add("active");
+    cat2OrderSequential.classList.remove("active");
+    cat2IsRandom = true;
+    initCat2Queue();
+  });
+
+  cat2ChoicesAll.addEventListener("click", () => {
+    cat2ChoicesAll.classList.add("active");
+    cat2Choices4.classList.remove("active");
+    cat2ChoiceMode = "all";
+    renderQuestionCat2();
+  });
+
+  cat2Choices4.addEventListener("click", () => {
+    cat2Choices4.classList.add("active");
+    cat2ChoicesAll.classList.remove("active");
+    cat2ChoiceMode = "four";
+    renderQuestionCat2();
+  });
+
+  function initCat2Queue() {
+    if (cat2IsRandom) {
+      cat2QuestionList = [...cat2QuestionsDatabase].sort(() => Math.random() - 0.5);
+    } else {
+      cat2QuestionList = [...cat2QuestionsDatabase].sort((a, b) => a.id - b.id);
+    }
+    cat2CurrentIndex = 0;
+    renderQuestionCat2();
+  }
+
+  function renderQuestionCat2() {
+    cat2SelectedSymbols.clear();
+    qaResultBox.classList.add("hidden");
+    qaResultBox.className = "qa-result-box hidden";
+    qaSubmitBtn.classList.remove("hidden");
+    qaNextBtn.classList.add("hidden");
+    qaSubmitBtn.disabled = false;
+
+    const currentQ = cat2QuestionList[cat2CurrentIndex];
+    qaQuestionTitle.textContent = currentQ.question;
+    qaProgressBadge.textContent = `問 ${cat2CurrentIndex + 1} / ${cat2QuestionList.length}`;
+
+    if (cat2ChoiceMode === "all") {
+      cat2CurrentChoices = [...ionizationData];
+    } else {
+      const correctAnswers = [...currentQ.answers];
+      const allSymbols = ionizationData.map(d => d.symbol);
+      const wrongAnswers = allSymbols.filter(s => !correctAnswers.includes(s));
+
+      const maxCorrectCount = Math.min(4, correctAnswers.length);
+      const pickCorrectCount = Math.floor(Math.random() * maxCorrectCount) + 1;
+
+      const shuffledCorrect = [...correctAnswers].sort(() => Math.random() - 0.5);
+      const chosenCorrect = shuffledCorrect.slice(0, pickCorrectCount);
+
+      const neededWrongCount = 4 - pickCorrectCount;
+      const shuffledWrong = [...wrongAnswers].sort(() => Math.random() - 0.5);
+      const chosenWrong = shuffledWrong.slice(0, neededWrongCount);
+
+      const combinedSymbols = [...chosenCorrect, ...chosenWrong];
+      cat2CurrentChoices = combinedSymbols
+        .map(symbol => ionizationData.find(item => item.symbol === symbol))
+        .sort(() => Math.random() - 0.5);
+
+    }
+
+    renderChoicesCat2();
+  }
+
+  function renderChoicesCat2() {
+    qaChoicesChips.innerHTML = "";
+    cat2CurrentChoices.forEach(item => {
+      const chip = document.createElement("div");
+      chip.className = "qa-chip";
+      if (cat2SelectedSymbols.has(item.symbol)) {
+        chip.classList.add("selected");
+      }
+
+      chip.innerHTML = `<span class="symbol">${item.displaySymbol || item.symbol}</span>`;
+      chip.addEventListener("click", () => toggleChoiceCat2(item.symbol, chip));
+      qaChoicesChips.appendChild(chip);
+    });
+  }
+
+  function toggleChoiceCat2(symbol, chipEl) {
+    if (qaSubmitBtn.classList.contains("hidden")) return;
+
+    if (cat2SelectedSymbols.has(symbol)) {
+      cat2SelectedSymbols.delete(symbol);
+      chipEl.classList.remove("selected");
+    } else {
+      cat2SelectedSymbols.add(symbol);
+      chipEl.classList.add("selected");
+    }
+  }
+
+  // --- Cat3: 性質逆引き制御 ---
+  cat3OrderSequential.addEventListener("click", () => {
+    cat3OrderSequential.classList.add("active");
+    cat3OrderRandom.classList.remove("active");
+    cat3IsRandom = false;
+    initCat3Queue();
+  });
+
+  cat3OrderRandom.addEventListener("click", () => {
+    cat3OrderRandom.classList.add("active");
+    cat3OrderSequential.classList.remove("active");
+    cat3IsRandom = true;
+    initCat3Queue();
+  });
+
+  function initCat3Queue() {
+    const targetElements = ionizationData.filter(d => d.symbol !== "H2");
+    if (cat3IsRandom) {
+      cat3QuestionList = [...targetElements].sort(() => Math.random() - 0.5);
+    } else {
+      cat3QuestionList = [...targetElements].sort((a, b) => a.rank - b.rank);
+    }
+    cat3CurrentIndex = 0;
+    renderQuestionCat3();
+  }
+
+  function renderQuestionCat3() {
+    cat3SelectedProps.clear();
+    qaResultBox.classList.add("hidden");
+    qaResultBox.className = "qa-result-box hidden";
+    qaSubmitBtn.classList.remove("hidden");
+    qaNextBtn.classList.add("hidden");
+    qaSubmitBtn.disabled = false;
+
+    const currentElem = cat3QuestionList[cat3CurrentIndex];
+    qaQuestionTitle.textContent = `【${currentElem.name} (${currentElem.displaySymbol || currentElem.symbol})】の化学的性質・反応として正しいものをすべて選んでください。`;
+    qaProgressBadge.textContent = `問 ${cat3CurrentIndex + 1} / ${cat3QuestionList.length}`;
+
+    renderChoicesCat3();
+  }
+
+  function renderChoicesCat3() {
+    qaChoicesChips.innerHTML = "";
+    cat3PropertyList.forEach(prop => {
+      const chip = document.createElement("div");
+      chip.className = `qa-prop-chip group-${prop.group}`;
+      if (cat3SelectedProps.has(prop.id)) {
+        chip.classList.add("selected");
+      }
+
+      chip.textContent = prop.label;
+      chip.addEventListener("click", () => toggleChoiceCat3(prop.id, chip));
+      qaChoicesChips.appendChild(chip);
+    });
+  }
+
+  function toggleChoiceCat3(propId, chipEl) {
+    if (qaSubmitBtn.classList.contains("hidden")) return;
+  
+    // すでに選択されている場合は解除
+    if (cat3SelectedProps.has(propId)) {
+      cat3SelectedProps.delete(propId);
+      chipEl.classList.remove("selected");
+      return;
+    }
+  
+    // 今回選択する性質のグループを取得
+    const selectedProp = cat3PropertyList.find(prop => prop.id === propId);
+  
+    if (selectedProp && selectedProp.group) {
+      // 同じグループの別の性質を解除
+      cat3PropertyList.forEach(prop => {
+        if (
+          prop.group === selectedProp.group &&
+          prop.id !== propId &&
+          cat3SelectedProps.has(prop.id)
+        ) {
+          cat3SelectedProps.delete(prop.id);
+  
+          const oldChip = [...qaChoicesChips.querySelectorAll(".qa-prop-chip")]
+            .find(chip => chip.textContent === prop.label);
+  
+          if (oldChip) {
+            oldChip.classList.remove("selected");
+          }
+        }
+      });
+    }
+  
+    // 新しい性質を選択
+    cat3SelectedProps.add(propId);
+    chipEl.classList.add("selected");
+  }
+
+  // --- 共通アクションボタン制御 ---
+  qaResetBtn.addEventListener("click", () => {
+    if (activeCategory === "cat1") {
+      userSelection = [];
+      remainingChoices = [...currentTargets].sort(() => Math.random() - 0.5);
+      qaResultBox.classList.add("hidden");
+      qaSubmitBtn.classList.remove("hidden");
+      qaNextBtn.classList.add("hidden");
+      renderQaChipsCat1();
+    } else if (activeCategory === "cat2") {
+      cat2SelectedSymbols.clear();
+      qaResultBox.classList.add("hidden");
+      qaSubmitBtn.classList.remove("hidden");
+      qaNextBtn.classList.add("hidden");
+      renderChoicesCat2();
+    } else if (activeCategory === "cat3") {
+      cat3SelectedProps.clear();
+      qaResultBox.classList.add("hidden");
+      qaSubmitBtn.classList.remove("hidden");
+      qaNextBtn.classList.add("hidden");
+      renderChoicesCat3();
+    }
+  });
+
+  qaSubmitBtn.addEventListener("click", () => {
+    if (activeCategory === "cat1") checkAnswerCat1();
+    else if (activeCategory === "cat2") checkAnswerCat2();
+    else if (activeCategory === "cat3") checkAnswerCat3();
+  });
+
+  qaNextBtn.addEventListener("click", () => {
+    if (activeCategory === "cat1") {
+      generateQuestionCat1();
+    } else if (activeCategory === "cat2") {
+      cat2CurrentIndex++;
+      if (cat2CurrentIndex >= cat2QuestionList.length) {
+        cat2CurrentIndex = 0;
+      }
+      renderQuestionCat2();
+    } else if (activeCategory === "cat3") {
+      cat3CurrentIndex++;
+      if (cat3CurrentIndex >= cat3QuestionList.length) {
+        cat3CurrentIndex = 0;
+      }
+      renderQuestionCat3();
+    }
+  });
+
+  function checkAnswerCat1() {
+    let isCorrect = true;
+    for (let i = 0; i < currentTargets.length; i++) {
+      if (userSelection[i].symbol !== currentTargets[i].symbol) {
+        isCorrect = false;
+        break;
+      }
+    }
+
+    const trayChipEls = qaTrayChips.querySelectorAll(".qa-chip");
+    trayChipEls.forEach((chip, idx) => {
+      if (userSelection[idx].symbol === currentTargets[idx].symbol) {
+        chip.classList.add("correct");
+      } else {
+        chip.classList.add("wrong");
+      }
+    });
+
+    const correctSeqText = currentTargets.map(t => t.displaySymbol || t.symbol).join(" > ");
+
+    qaResultBox.classList.remove("hidden");
+    if (isCorrect) {
+      qaResultBox.className = "qa-result-box correct";
+      qaResultBox.innerHTML = `
+        <div class="qa-result-header">🎉 正解！</div>
+        <div>正しくイオン化傾向の順序を並べ替えることができました。</div>
+        <div style="margin-top: 6px; font-weight: bold; color: #234e52;">順序: ${correctSeqText}</div>
+      `;
+    } else {
+      qaResultBox.className = "qa-result-box wrong";
+      qaResultBox.innerHTML = `
+        <div class="qa-result-header">❌ 残念...</div>
+        <div>正しいイオン化傾向の順番を確認してみましょう。</div>
+        <div style="margin-top: 6px; font-weight: bold; color: #742a2a;">正解: ${correctSeqText}</div>
+      `;
+    }
+
+    qaSubmitBtn.classList.add("hidden");
+    qaNextBtn.textContent = (currentCount === 17) ? "もう一度" : "次の問題へ";
+    qaNextBtn.classList.remove("hidden");
+  }
+
+  function checkAnswerCat2() {
+    const currentQ = cat2QuestionList[cat2CurrentIndex];
+    const correctSetAll = new Set(currentQ.answers);
+
+    const currentChoiceSymbols = cat2CurrentChoices.map(c => c.symbol);
+    const correctInCurrentChoices = new Set(currentChoiceSymbols.filter(s => correctSetAll.has(s)));
+
+    let isCorrect = (cat2SelectedSymbols.size === correctInCurrentChoices.size);
+    if (isCorrect) {
+      for (let sym of cat2SelectedSymbols) {
+        if (!correctInCurrentChoices.has(sym)) {
+          isCorrect = false;
+          break;
+        }
+      }
+    }
+
+    const choiceChipEls = qaChoicesChips.querySelectorAll(".qa-chip");
+    choiceChipEls.forEach((chip) => {
+      const sym = chip.querySelector(".symbol").textContent.replace("(", "").replace(")", "");
+      const rawSym = (sym === "H₂") ? "H2" : sym;
+
+      chip.classList.remove("selected");
+
+      if (cat2SelectedSymbols.has(rawSym) && correctInCurrentChoices.has(rawSym)) {
+        chip.classList.add("correct");
+      } else if (cat2SelectedSymbols.has(rawSym) && !correctInCurrentChoices.has(rawSym)) {
+        chip.classList.add("wrong");
+      } else if (!cat2SelectedSymbols.has(rawSym) && correctInCurrentChoices.has(rawSym)) {
+        chip.classList.add("missed");
+      }
+    });
+
+    const correctNamesText = currentQ.answers.map(s => {
+      const found = ionizationData.find(d => d.symbol === s);
+      return found ? (found.displaySymbol || found.symbol) : s;
+    }).join(", ");
+
+    qaResultBox.classList.remove("hidden");
+    if (isCorrect) {
+      qaResultBox.className = "qa-result-box correct";
+      qaResultBox.innerHTML = `
+        <div class="qa-result-header">🎉 正解！</div>
+        <div><b>全体での該当元素:</b> ${correctNamesText}</div>
+        <div style="margin-top: 6px; font-size: 12px; color: #2d3748;">${currentQ.explanation}</div>
+      `;
+    } else {
+      qaResultBox.className = "qa-result-box wrong";
+      qaResultBox.innerHTML = `
+        <div class="qa-result-header">❌ 不正解...</div>
+        <div><b>全体での該当元素:</b> ${correctNamesText}</div>
+        <div style="margin-top: 6px; font-size: 12px; color: #2d3748;">${currentQ.explanation}</div>
+        <div style="margin-top: 4px; font-size: 10px; color: #742a2a;">※黄色のチップは選び忘れた正解元素です。</div>
+      `;
+    }
+
+    qaSubmitBtn.classList.add("hidden");
+    qaNextBtn.textContent = (cat2CurrentIndex === cat2QuestionList.length - 1) ? "最初に戻る" : "次の問題へ";
+    qaNextBtn.classList.remove("hidden");
+  }
+
+  function checkAnswerCat3() {
+    const currentElem = cat3QuestionList[cat3CurrentIndex];
+    const correctProps = new Set(elementPropertiesMap[currentElem.symbol] || []);
+
+    let isCorrect = (cat3SelectedProps.size === correctProps.size);
+    if (isCorrect) {
+      for (let pId of cat3SelectedProps) {
+        if (!correctProps.has(pId)) {
+          isCorrect = false;
+          break;
+        }
+      }
+    }
+
+    const chipEls = qaChoicesChips.querySelectorAll(".qa-prop-chip");
+    chipEls.forEach((chip, idx) => {
+      const propId = cat3PropertyList[idx].id;
+      chip.classList.remove("selected");
+
+      if (cat3SelectedProps.has(propId) && correctProps.has(propId)) {
+        chip.classList.add("correct");
+      } else if (cat3SelectedProps.has(propId) && !correctProps.has(propId)) {
+        chip.classList.add("wrong");
+      } else if (!cat3SelectedProps.has(propId) && correctProps.has(propId)) {
+        chip.classList.add("missed");
+      }
+    });
+
+    qaResultBox.classList.remove("hidden");
+    const detailsHtml = `
+      <div style="margin-top: 6px; font-size: 12px; background: rgba(255,255,255,0.7); padding: 8px; border-radius: 6px; border: 1px solid rgba(0,0,0,0.1);">
+        <div><b>【空気】</b> ${currentElem.air}</div>
+        <div><b>【水】</b> ${currentElem.water}</div>
+        <div><b>【酸】</b> ${currentElem.acid}</div>
+      </div>
+    `;
+
+    if (isCorrect) {
+      qaResultBox.className = "qa-result-box correct";
+      qaResultBox.innerHTML = `
+        <div class="qa-result-header">🎉 正解！</div>
+        <div><b>${currentElem.name} (${currentElem.displaySymbol || currentElem.symbol})</b> の性質を正しく選択できました。</div>
+        ${detailsHtml}
+      `;
+    } else {
+      qaResultBox.className = "qa-result-box wrong";
+      qaResultBox.innerHTML = `
+        <div class="qa-result-header">❌ 不正解...</div>
+        <div>正しい性質を確認してみましょう。</div>
+        ${detailsHtml}
+        <div style="margin-top: 4px; font-size: 10px; color: #742a2a;">※黄色の選択肢は選び忘れた正しい性質です。</div>
+      `;
+    }
+
+    qaSubmitBtn.classList.add("hidden");
+    qaNextBtn.textContent = (cat3CurrentIndex === cat3QuestionList.length - 1) ? "最初に戻る" : "次の問題へ";
+    qaNextBtn.classList.remove("hidden");
+  }
+
+  checkVersionUpdate();
+</script>
+</body>
+</html>
